@@ -3,7 +3,6 @@
 // TODO: remove this comment header
 
 #include <cctype>
-#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -12,14 +11,13 @@
 #include "gwindow.h"
 #include "filelib.h"
 #include "console.h"
-#include <vector>
 #include <queue>
 #include <climits>
 
 using namespace std;
 
 void getDic(unordered_map<string,int>&);
-bool doLadder( unordered_map<string,int>&, unordered_map<string,string>&, string&, string& );
+bool doLadder( unordered_map<string,int>, unordered_map<string,string>&, string&, string& );
 void printAns(unordered_map<string, string>&, string&start, string &end);
 void helper( unordered_map<string, string>&, string&, string& );
 
@@ -27,12 +25,12 @@ int main() {
     // TODO: Finish the program!
 
     unordered_map<string, int>  distance;
-    unordered_map<string, string> predecessor;
+
     getDic( distance );
 
     while(1){
 
-        stack<string> ans;
+        unordered_map<string, string> predecessor;
 
         string word1;
         string word2;
@@ -63,9 +61,9 @@ int main() {
             continue;
         }
 
-        cout<<"A ladder from cat back to dog:"<<endl;
+        cout<<"A ladder from "<<word2<<" back to "<<word1<<":"<<endl;
 
-        distance[word1] = 0;
+        distance[word1] = -1;
         if(doLadder(distance, predecessor, word1, word2) ){
 
             printAns( predecessor, word1, word2);
@@ -73,6 +71,8 @@ int main() {
 
             cout<<"The two words must be found in the dictionary."<<endl;
         }
+
+        distance[word1] = 0;
 
     }
 
@@ -95,7 +95,7 @@ void helper( unordered_map<string,string>& predecessor, string& start, string& w
     cout<< word << " ";
     helper( predecessor, start, predecessor[word]);
 }
-bool doLadder( unordered_map<string,int>& distance, unordered_map<string, string>& predecessor, string& start, string& end ){
+bool doLadder( unordered_map<string,int> distance, unordered_map<string, string>& predecessor, string& start, string& end ){
 
     queue<string> q;
 
@@ -104,12 +104,13 @@ bool doLadder( unordered_map<string,int>& distance, unordered_map<string, string
     while( !q.empty()){  // BFS
 
         int size = q.size();
+
         for( int i=0 ; i<size ; i++){
 
             string word = q.front();
             q.pop();
 
-            if(word == end) return true;
+            if( word == end ) return true;
 
             for( int i=0 ; i<word.size() ; i++){  // get 1-step word
 
@@ -118,21 +119,19 @@ bool doLadder( unordered_map<string,int>& distance, unordered_map<string, string
                 for( char ch='a'; ch<='z' ; ch++ ){
 
                     tmp[i] = ch;
-                    if( tmp == start ) continue;
-                    if( distance.count(tmp)!=0){
+                    if( tmp == start || distance.count(tmp) == 0 ) continue;
 
-                        if( distance[tmp]>distance[word]+1){
+                    if( !distance[tmp] ){
 
-                            predecessor[tmp] = word;
-                            //cout<< "next word= "<<tmp<<endl;
-                            //cout<< "original distance= "<<distance[tmp]<<endl;
-                            //cout<< "new distance= "<<distance[word]+1<<endl;
-                            distance[tmp] = distance[word]+1;
-                            q.push(tmp);
-                        }
+                        predecessor[tmp] = word;
+                        distance[tmp] = 1;
+                        q.push(tmp);
+
                     }
+
                 }
             }
+
         }
         cout<< "size="<<size<<endl;
     }
@@ -169,7 +168,7 @@ void getDic( unordered_map<string,int>& distance ){
 
     while( getline( input, line)){
 
-      distance[line] = INT_MAX;
+      distance[line] = 0;
 
     }
 
