@@ -1,0 +1,4 @@
+QMAKE_TARGET_BUNDLE_PREFIX = \
+    Tim \
+    J. \
+    Chang
